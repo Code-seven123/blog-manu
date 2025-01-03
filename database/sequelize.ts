@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize-typescript";
+import { Sequelize } from "sequelize";
 import { logger } from "../src/winston-log"
 import { Users } from "./models/User";
 import { Blog }  from "./models/Blog";

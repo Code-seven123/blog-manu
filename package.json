@@ -10,11 +10,9 @@
   },
   "dependencies": {
     "@types/express": "^5.0.0",
-    "@types/sequelize": "^4.28.20",
+    "@types/node": "^22.10.5",
     "express": "^4.21.2",
-    "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.5",
-    "sequelize-typescript": "^2.1.6",
     "sqlite3": "^5.1.7",
     "winston": "^3.17.0",
     "zod": "^3.24.1"
