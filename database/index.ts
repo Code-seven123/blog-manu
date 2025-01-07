@@ -27,6 +27,7 @@ export class Users extends Model<InferAttributes<Users>, InferCreationAttributes
   declare userId: CreationOptional<number>;
   declare username: string;
   declare email: string;
+  declare bio: string;
   declare password: string;
   declare is_admin: boolean;
   declare createdAt: CreationOptional<Date>;
@@ -36,6 +37,7 @@ export class Blogs extends Model<InferAttributes<Blogs>, InferCreationAttributes
   declare blogId: CreationOptional<number>;
   declare title: string;
   declare content: string;
+  declare image: string;
   declare userId: ForeignKey<Users["userId"]>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
@@ -56,6 +58,10 @@ Users.init({
     type: DataTypes.STRING(255),
     allowNull: false,
     unique: true
+  },
+  bio: {
+    type: DataTypes.STRING(200),
+    allowNull: true
   },
   password: {
     type: DataTypes.TEXT,
@@ -79,11 +85,15 @@ Blogs.init({
     primaryKey: true,
   },
   title: {
-    type: DataTypes.STRING(150),
+    type: DataTypes.STRING(100),
     allowNull: false,
     unique: true
   },
   content: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  image: {
     type: DataTypes.TEXT,
     allowNull: false
   },
@@ -105,11 +115,11 @@ Users.hasMany(Blogs, {
 })
 Blogs.belongsTo(Users, { targetKey: "userId" })
 
-const opt: object = process.env.NODE_ENV == "development" ? { force: true } : { alter: true }
-await sequelize.sync(opt)
-  .then(() => {
-    logger.info('Database synchronized.');
-  })
-  .catch((error) => {
-    logger.error('Error syncing database:', error);
-  });
+// const opt: object = process.env.NODE_ENV == "development" ? { force: true } : { alter: true }
+// await sequelize.sync(opt)
+//   .then(() => {
+//     logger.info('Database synchronized.');
+//   })
+//   .catch((error) => {
+//     logger.error('Error syncing database:', error);
+//   });

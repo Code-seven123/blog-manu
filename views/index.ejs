@@ -1,1 +1,109 @@
-<h1>Test</h1>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manu Blog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark fixed-top">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Manu Blog</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Settings</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#"></a>
+              </li>
+              <li class="nav-item border border-white bg-opacity-9 bg-success border-3">
+                <h1 class="nav-link disabled fs-3 ms-2" style="color: white">Username</h1>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">My Blog</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Account Settings
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                  <li><a class="dropdown-item" href="#">Reset Password</a></li>
+                  <li><a class="dropdown-item" href="#">Change Account Information</a></li>
+                  <li>
+                    <hr class="dropdown-divider">
+                  </li>
+                  <li><a class="dropdown-item" href="#"></a></li>
+                </ul>
+              </li>
+            </ul>
+            <form class="input-group" role="search">
+              <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+              <button class="btn btn-success" type="submit">Search</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <section class="bg-primary text-white text-center py-5 d-flex align-items-center" style="height: 85vh">
+      <div class="container">
+          <h1 class="display-3">Welcome to My Creative Blog</h1>
+          <p class="lead">Discover stories, ideas, and inspiration that fuel creativity every day.</p>
+          <a href="#posts" class="btn btn-warning btn-lg mt-3">Explore Latest Posts</a>
+      </div>
+    </section>
+
+    <!-- Blog Posts Section -->
+    <section id="posts" class="container my-5">
+        <h2 class="text-center mb-4">Latest Posts</h2>
+        <div class="row">
+          <% for(const data of dataBlog) {%>
+          <div class="col-md-4">
+              <div class="card mb-4 shadow-sm">
+                  <img src="<%= data.image ?? 'https://via.placeholder.com/350x200' %>" class="card-img-top" alt="Blog Post Image">
+                  <div class="card-body">
+                      <h5 class="card-title"><%= he.encode(data.title) %></h5>
+                      <p class="card-text"><%= he.encode(data.content.slice(200)) %></p>
+                      <a href="#" class="btn btn-primary">Read More</a>
+                  </div>
+              </div>
+          </div>
+          <% } %>
+        </div>
+        <nav aria-label="pagination blog">
+          <ul class="pagination justify-content-center">
+            <li class="page-item <%= currentPage <= 1 ? 'disabled' : '' %>">
+              <a class="page-link" href="/<%= currentPage - 1 %>#posts"><span aria-hidden="true">&laquo;</span></a>
+            </li>
+            <% for(let i = 1; i <= page; i++) { %>
+            <li class="page-item">
+              <a class="page-link <%= i == currentPage ? 'active' : '' %>" href="/<%= i %>"><%= i %></a>
+            </li>
+            <% } %>
+            <li class="page-item <%= currentPage == page ? 'disabled' : '' %>">
+              <a class="page-link" href="/<%= currentPage + 1 %>#posts"><span aria-hidden="true">&raquo;</span></a>
+            </li>
+          </ul>
+        </nav>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-dark text-white text-center py-4">
+        <p>&copy; 2025 Creative Blog. All rights reserved.</p>
+        <p>Follow us on
+            <a href="#" class="text-warning">Twitter</a>,
+            <a href="#" class="text-warning">Facebook</a>, and
+            <a href="#" class="text-warning">Instagram</a>.
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+  </body>
+</html>
