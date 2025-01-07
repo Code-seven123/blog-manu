@@ -11,17 +11,17 @@ export const logger = winston.createLogger({
     }),
     new File({ 
       level: "error",
-      filename: "../log/error.log",
+      filename: "./log/error.log",
       format: winston.format.combine(winston.format.timestamp(), winston.format.json())
     }),
     new File({ 
       level: "fatal",
-      filename: "../log/fatal.log",
+      filename: "./log/fatal.log",
       format: winston.format.combine(winston.format.timestamp(), winston.format.json())
     }),
     new File({ 
       level: "warn",
-      filename: "../log/warn.log",
+      filename: "./log/warn.log",
       format: winston.format.combine(winston.format.timestamp(), winston.format.json())
     })
   ]
