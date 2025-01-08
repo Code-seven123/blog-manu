@@ -5,20 +5,31 @@
   "devDependencies": {
     "@types/bun": "latest",
     "faker": "^6.6.6",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "pg-hstore": "^2.3.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/csurf": "^1.11.5",
     "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.1",
+    "@types/express-winston": "^4.0.2",
     "@types/he": "^1.2.3",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.5",
+    "cookie-parser": "^1.4.7",
+    "csurf": "^1.11.0",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "express-winston": "^4.2.0",
     "he": "^1.2.0",
+    "jsonwebtoken": "^9.0.2",
     "lru-cache": "^11.0.2",
     "mysql2": "^3.12.0",
     "sequelize": "^6.37.5",

@@ -6,6 +6,8 @@ declare namespace NodeJS {
     DB_PASSWORD: string;
     DB_NAME: string;
     DB_FILE: string;
-    PORT: number
+    PORT: number;
+    SESSION_KEY: string;
+    SECRET_JWT_KEY: string;
   }
 }

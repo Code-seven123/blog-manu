@@ -15,7 +15,7 @@
         </button>
         <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
           <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Settings</h5>
+            <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel"><%= userLogged ? "Settings" : "Menu" %></h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
           </div>
           <div class="offcanvas-body">
@@ -23,6 +23,7 @@
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="#"></a>
               </li>
+              <% if(userLogged) { %>
               <li class="nav-item border border-white bg-opacity-9 bg-success border-3">
                 <h1 class="nav-link disabled fs-3 ms-2" style="color: white">Username</h1>
               </li>
@@ -36,12 +37,14 @@
                 <ul class="dropdown-menu dropdown-menu-dark">
                   <li><a class="dropdown-item" href="#">Reset Password</a></li>
                   <li><a class="dropdown-item" href="#">Change Account Information</a></li>
+                  <li><a class="dropdown-item" href="/logout">Logout</a></li>
                   <li>
                     <hr class="dropdown-divider">
                   </li>
                   <li><a class="dropdown-item" href="#"></a></li>
                 </ul>
               </li>
+              <% } %>
             </ul>
             <form class="input-group" role="search">
               <input class="form-control" type="search" placeholder="Search" aria-label="Search">
@@ -71,7 +74,7 @@
                   <div class="card-body">
                       <h5 class="card-title"><%= he.encode(data.title) %></h5>
                       <p class="card-text"><%= he.encode(data.content.slice(200)) %></p>
-                      <a href="#" class="btn btn-primary">Read More</a>
+                      <a href="<%= data.title.trim().replace(" ", "-").toLowerCase() ?? '#' %>" class="btn btn-primary">Read More</a>
                   </div>
               </div>
           </div>
