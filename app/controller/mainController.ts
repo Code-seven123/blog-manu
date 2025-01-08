@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Blogs } from "../../database";
 import { logger } from "../../src/winston-log";
+import jwt, { Secret } from 'jsonwebtoken';
 
 export default class MainController {
   private pageSize: number = 6
@@ -8,7 +9,7 @@ export default class MainController {
     try {
       const blogsData: Array<object> = await Blogs.findAll({ limit: this.pageSize })
       const sumPage: number = Math.ceil(blogsData.length / this.pageSize)
-      res.render("index", { dataBlog: blogsData, page: sumPage, currentPage: 0 })
+      res.render("index", { dataBlog: blogsData, page: sumPage, currentPage: 1 })
     } catch (error) {
       logger.error("Error index as mainController", error)
       res.status(500)

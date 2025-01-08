@@ -9,5 +9,6 @@ declare namespace NodeJS {
     PORT: number;
     SESSION_KEY: string;
     SECRET_JWT_KEY: string;
+    SECRET_COOKIE_KEY: string;
   }
 }
