@@ -29,6 +29,7 @@ export class Users extends Model<InferAttributes<Users>, InferCreationAttributes
   declare email: string;
   declare bio: string;
   declare password: string;
+  declare otpVerify: boolean;
   declare is_admin: boolean;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
@@ -66,6 +67,10 @@ Users.init({
   password: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  otpVerify: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   },
   is_admin: {
     type: DataTypes.BOOLEAN,
@@ -115,11 +120,11 @@ Users.hasMany(Blogs, {
 })
 Blogs.belongsTo(Users, { targetKey: "userId" })
 
-// const opt: object = process.env.NODE_ENV == "development" ? { force: true } : { alter: true }
-// await sequelize.sync(opt)
-//   .then(() => {
-//     logger.info('Database synchronized.');
-//   })
-//   .catch((error) => {
-//     logger.error('Error syncing database:', error);
-//   });
+const opt: object = process.env.NODE_ENV == "development" ? { force: true } : { alter: true }
+await sequelize.sync(opt)
+  .then(() => {
+    logger.info('Database synchronized.');
+  })
+  .catch((error) => {
+    logger.error('Error syncing database:', error);
+  });

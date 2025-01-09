@@ -8,7 +8,8 @@ export default class MainController {
   public index = async (req:Request, res:Response): Promise<void> => {
     try {
       const blogsData: Array<object> = await Blogs.findAll({ limit: this.pageSize })
-      const sumPage: number = Math.ceil(blogsData.length / this.pageSize)
+      const blogslength: number = await Blogs.count()
+      const sumPage: number = Math.ceil(blogslength / this.pageSize)
       res.render("index", { dataBlog: blogsData, page: sumPage, currentPage: 1 })
     } catch (error) {
       logger.error("Error index as mainController", error)

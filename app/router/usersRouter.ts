@@ -13,4 +13,7 @@ router.get("/login", csrfProtection, usersController.login)
 router.get("/register", csrfProtection, usersController.register)
 router.post("/login", csrfProtection, usersController.loginRequest)
 router.post("/register", csrfProtection, usersController.registerRequest)
+router.get("/otp", csrfProtection, usersController.otp)
+router.post("/verify-otp", csrfProtection, usersController.otpVerify)
+
 export default router

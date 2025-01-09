@@ -9,7 +9,11 @@ async function createBlogs(id: number) {
     blogs.push({
       title: faker.lorem.sentence(),
       content: faker.lorem.paragraphs(3),
-      image: faker.image.urlPicsumPhotos(),
+      image: faker.image.urlPicsumPhotos({
+        width: 350,
+        height: 200,
+        blur: 2
+      }),
       userId: id,
     });
   }
@@ -30,7 +34,8 @@ describe('Blog Creation Tests', () => {
       email: "john.doe@example.com",
       password: "password123",
       is_admin: true,
-      bio: "hello"
+      bio: "hello",
+      otpVerify: false
     });
 
     userId = user.userId;

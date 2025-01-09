@@ -1,3 +1,5 @@
+import { Secret } from "jsonwebtoken";
+
 declare namespace NodeJS {
   interface ProcessEnv {
     DB_DRIVER: string;
@@ -10,5 +12,10 @@ declare namespace NodeJS {
     SESSION_KEY: string;
     SECRET_JWT_KEY: string;
     SECRET_COOKIE_KEY: string;
+    EMAIL_NAME: string;
+    EMAIL_PASSWORD: string;
+    EMAIL_HOST: string
+    EMAIL_PORT: number;
+    EMAIL_SECURE: boolean;
   }
 }

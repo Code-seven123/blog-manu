@@ -63,9 +63,9 @@
   <div class="container d-flex justify-content-center align-items-center" style="width: 100vw; height: 100vh">
     <form action="/users/login" method="POST" class="rounded shadow-lg text-center p-3 d-flex align-items-center flex-column" style="width: 400px; height: 420px;">
       <h1 class="text-center fs-2 mb-1">Login</h1>
-      <% if(message) { %>
+      <% if(errorEjs) { %>
         <div class="alert alert-danger" role="alert">
-            <%= message %>
+            <%= errorEjs %>
         </div>        
       <% } %>
       <!-- CSRF Token -->
