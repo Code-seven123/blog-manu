@@ -7,5 +7,5 @@ const mainController = new MainController()
 
 router.get("/", mainController.index)
 router.get("/:page", mainController.page)
-router.get("/:title", mainController.title)
+
 export default router

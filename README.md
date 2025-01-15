@@ -133,3 +133,64 @@ graph TB
     EmailService -.->|"Logs"| Logger
     ORM -.->|"Logs"| Logger
 ```
+
+```mermaid
+graph TD
+    subgraph "Registration Flow"
+        register["/register Route"]
+        regReq["Register Request"]
+        validate["Validate Input"]
+        hashPwd["Hash Password"]
+        createUser["Create User"]
+        genToken["Generate JWT Token"]
+        setCookie["Set Cookie"]
+    end
+
+    subgraph "OTP Generation & Delivery"
+        otpRoute["/otp Route"]
+        verifyToken["Verify JWT"]
+        checkOTPStatus["Check OTP Status"]
+        genOTP["Generate OTP"]
+        emailPrep["Prepare Email"]
+        sendMail["Send OTP Email"]
+        renderOTP["Render OTP Page"]
+    end
+
+    subgraph "OTP Verification"
+        verifyRoute["/verify-otp Route"]
+        validateOTP["Validate OTP Input"]
+        compareOTP["Compare OTP"]
+        updateUser["Update User Status"]
+        newToken["Generate New Token"]
+        redirect["Redirect to Home"]
+    end
+
+    %% Registration Flow
+    register --> regReq
+    regReq --> validate
+    validate --> hashPwd
+    hashPwd --> createUser
+    createUser --> genToken
+    genToken --> setCookie
+    setCookie --> otpRoute
+
+    %% OTP Generation & Delivery
+    otpRoute --> verifyToken
+    verifyToken --> checkOTPStatus
+    checkOTPStatus --> genOTP
+    genOTP --> emailPrep
+    emailPrep --> sendMail
+    sendMail --> renderOTP
+
+    %% OTP Verification
+    verifyRoute --> validateOTP
+    validateOTP --> compareOTP
+    compareOTP -->|Match| updateUser
+    updateUser --> newToken
+    newToken --> redirect
+    compareOTP -->|No Match| renderOTP
+
+    %% Database Interactions
+    createUser -->|Save| DB[(Database)]
+    updateUser -->|Update| DB
+```

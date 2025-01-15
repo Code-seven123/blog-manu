@@ -1,8 +1,9 @@
 import * as session from "express-session";
+import { IpVersion } from "zod";
 declare module "express-session" {
   interface SessionData {
-    user: { status: boolean = false; token: string };
-    csrfToken?: string;
+    token?: string;
     otp?: string;
+    ip?: string = '';
   }
 }

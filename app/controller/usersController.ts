@@ -47,6 +47,10 @@ export default class UsersController {
       message: "Password harus mengandung karakter khusus, huruf kapital, dan angka.",
     });
 
+  private otpSchema = z
+    .string()
+    .length(6, { message: "Otp harus memiliki panjang 6" })
+
   private handleValidationErrors = (error: ZodError): string => {
     if (!error.errors || !Array.isArray(error.errors)) {
       return "Unknown validation error";
@@ -55,12 +59,46 @@ export default class UsersController {
       .map((err: ZodIssue) => err.message || "Unknown error")
       .join(", ");
   };
+  private createLogin = async (req:Request, res:Response, userId:number): Promise<boolean> => {
+    if(!(req.session.ip ?? "127.0.0.1" === req.ip)) return false;
+    try {
+      const user = await Users.findOne({ raw: true, where: { id: userId } })
+      const jwtSession: string = jwt.sign({
+        _id: user?.id,
+        email: user?.email,
+        name: user?.username,
+        otpVerify: user?.otpVerify as boolean,
+      }, process.env.SECRET_JWT_KEY as Secret, { expiresIn: "30 days" });
+      req.session.ip = req.ip
+      req.session.token = jwtSession
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000
+      res.locals.userLogged = true
+      return true
+    } catch (error) {
+      logger.error("error create login instance", error)
+      return false
+    }
+  }
 
-    // logout instance
-    public logout = async (req: Request, res: Response): Promise<void> => {
-      res.clearCookie("token");
-      res.redirect("/");
-    };
+  // logout instance
+  public logout = async (req: Request, res: Response): Promise<void> => {
+    req.session.regenerate((err) => {
+      if (err) {
+        return res.status(500).send("Gagal untuk menginisialisasi ulang sesi.");
+      }
+  
+      // Sekarang sesi baru dimulai, Anda bisa menghapus data sesi atau menandai pengguna sebagai logout
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).send("Gagal menghancurkan sesi.");
+        }
+        
+        // Menghapus cookie sesi
+        res.clearCookie("connect.sid");
+        res.redirect("/?success=logout+success");
+      });
+    });
+  };
 
      // login instance
   public login = async (req: Request, res: Response): Promise<void> => {
@@ -76,6 +114,9 @@ export default class UsersController {
 
   // Login Request
   public loginRequest = async (req: Request, res: Response): Promise<void> => {
+    if (res.locals.userLogged) {
+      res.redirect("/")
+    }
     interface DataClient {
       email: string;
       password: string;
@@ -85,27 +126,22 @@ export default class UsersController {
       await this.emailLoginSchema.parseAsync(dataClient.email);
       await this.passwordSchema.parseAsync(dataClient.password);
 
-      const user = await Users.findOne({ where: { email: dataClient.email } });
+      const user = await Users.findOne({ raw: true, where: { email: dataClient.email } });
       if (user) {
-        const verify = await password.verifySync(dataClient.password, user.password, "bcrypt");
+        const verify: boolean = await password.verify(dataClient.password, user.password, "bcrypt");
         if (verify) {
-          const jwtSession = jwt.sign({
-            _id: user.userId,
-            email: user.email,
-            name: user.username,
-            otpVerify: user.otpVerify as boolean,
-          }, process.env.SECRET_JWT_KEY as Secret, { expiresIn: "2 days" });
-
-          res.cookie('token', jwtSession, {
-            httpOnly: true,
-            maxAge: 7*24*60*60*1000,
-            secure: process.env.COOKIE_SECURE === "true",
-            sameSite: "strict"
-          });
-          if (user.otpVerify) {
-            res.redirect("/");
+          const login: boolean = await this.createLogin(req, res, user.id)
+          if(login) {
+            if (user.otpVerify) {
+              res.locals.userLogged = true
+              const ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress) as string;
+              req.session.ip = ip
+              res.redirect("/");
+            } else {
+              res.redirect("/users/otp");
+            }
           } else {
-            res.redirect("/users/otp");
+            res.redirect("/")
           }
         } else {
           return res.redirect("/users/login?error=Password salah");
@@ -118,7 +154,7 @@ export default class UsersController {
         const errorMessage = this.handleValidationErrors(error);
         return res.redirect("/users/login?error=" + errorMessage);
       } else {
-        logger.error(error);
+        logger.error("Kesalahan tidak terduga", error);
         return res.redirect("/users/login?error=Kesalahan tidak terduga");
       }
     }
@@ -146,7 +182,7 @@ export default class UsersController {
         return res.redirect("/users/register?error=Password tidak sama");
       }
 
-      const hashedPassword = await password.hashSync(dataClient.password, "bcrypt");
+      const hashedPassword: string = await password.hashSync(dataClient.password, "bcrypt");
       const newUser = await Users.create({
         username: dataClient.username,
         email: dataClient.email,
@@ -156,24 +192,20 @@ export default class UsersController {
         otpVerify: false,
       });
 
-      const jwtSession = jwt.sign({
-        _id: newUser.dataValues.userId,
-        email: newUser.dataValues.email,
-        name: newUser.dataValues.username,
-        otpVerify: false,
-      }, process.env.SECRET_JWT_KEY as Secret, { expiresIn: "2 days" });
-
-      res.cookie('token', jwtSession, {
-        httpOnly: true,
-        maxAge: 7*24*60*60*1000,
-        secure: process.env.COOKIE_SECURE === "true",
-        sameSite: "strict"
-      });
-
-      res.redirect("/users/otp");
+      const login: boolean = await this.createLogin(req, res, newUser.dataValues.id)
+      if(login) {
+        if (newUser.dataValues.otpVerify) {
+          res.locals.userLogged = true
+          const ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress) as string;
+          req.session.ip = ip
+          res.redirect("/");
+        } else {
+          res.redirect("/users/otp");
+        }
+      }
     } catch (error: unknown) {
       if (error instanceof ZodError) {
-        const errorMessage = this.handleValidationErrors(error);
+        const errorMessage: string = this.handleValidationErrors(error);
         return res.redirect("/users/register?error=" + errorMessage);
       } else {
         logger.error(error);
@@ -184,19 +216,20 @@ export default class UsersController {
 
   // OTP Request
   public otp = async (req: Request, res: Response): Promise<void> => {
-    const token = req.cookies.token
+    const token: string | undefined = req.session.token
     if (!token) return res.redirect("/");
 
     try {
-      const jwtDecode = jwt.verify(token, process.env.SECRET_JWT_KEY as Secret);
-      const { otpVerify, email } = jwtDecode as JwtPayload;
+      const { otpVerify, email } = jwt.verify(token, process.env.SECRET_JWT_KEY as Secret) as JwtPayload;
 
       if (otpVerify) return res.redirect("/");
 
-      const mail = new Nodemailer();
-      const otp = await mail.sendOtp(email);
-      res.setHeader("X-OTP", otp);
-
+      const mail: Nodemailer = new Nodemailer();
+      if(!!!req.session.otp) {
+        const otp: string = await mail.sendOtp(email);
+        req.session.otp = otp
+        req.session.cookie.maxAge = 1 * 60 * 1000
+      }
       res.render("auth/otp", { csrf: req.csrfToken(), email });
     } catch (error) {
       logger.error("Error verifying JWT or sending OTP", error);
@@ -206,35 +239,108 @@ export default class UsersController {
 
   // OTP Verification
   public otpVerify = async (req: Request, res: Response): Promise<void> => {
-    const token = req.cookies.token
-    const otp = req.body.otp.join("");
-
+    const token: string | undefined = req.session.token
+    const otp: string = req.body.otp.join("");
+    const email = req.body.email
     if (!token || !otp) return res.redirect("/");
 
     try {
-      const jwtDecode = jwt.verify(token, process.env.SECRET_JWT_KEY as Secret);
-      const { _id } = jwtDecode as JwtPayload;
+      const { _id } = jwt.verify(token, process.env.SECRET_JWT_KEY as Secret) as JwtPayload;
+      await this.emailLoginSchema.parseAsync(email)
+      await this.otpSchema.parseAsync(otp)
+      const savedOtp = req.session.otp
+      if (otp === savedOtp as string) {
+        await Users.update({ otpVerify: true }, { where: { id: _id } });
+        const user = await Users.findOne({ where: { id: _id } });
 
-      const savedOtp = req.headers["x-otp"];
-      if (otp === savedOtp) {
-        await Users.update({ otpVerify: true }, { where: { userId: _id } });
-        const user = await Users.findOne({ where: { userId: _id } });
-
-        const newToken = jwt.sign({
-          _id: user?.userId,
-          email: user?.email,
-          name: user?.username,
-          otpVerify: true,
-        }, process.env.SECRET_JWT_KEY as Secret, { expiresIn: "30 days" });
-
-        res.setHeader("Authorization", `Bearer ${newToken}`);
-        res.redirect("/");
+        const login: boolean = await this.createLogin(req, res, user?.id!)
+        if(login) {
+          const ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress) as string;
+          req.session.ip = ip
+          res.locals.userLogged
+          res.redirect("/")
+          req.session.otp = ""
+        }
       } else {
         return res.redirect("/users/otp?error=OTP yang dimasukkan salah");
       }
     } catch (error) {
-      logger.error("Error verifying OTP", error);
-      return res.redirect("/users/otp?error=Kesalahan verifikasi OTP");
+      if (error instanceof ZodError) {
+        const errorMessage: string = this.handleValidationErrors(error);
+        return res.redirect("/users/otp?error=" + errorMessage);
+      } else {
+        logger.error("Error verify email", error);
+        return res.redirect("/users/otp?error=Kesalahan verifikasi OTP");
+      }
     }
   };
+  public requestOtp = async (req: Request, res: Response): Promise<void> => {
+    const token: string | undefined = req.session.token
+    if (!token) return res.redirect("/");
+    try {
+      const { _id, email } = jwt.verify(token, process.env.SECRET_JWT_KEY as Secret) as JwtPayload;
+      const userExist: number = await Users.count({ where: { id: _id } })
+      if(userExist === 1) {
+        const mail: Nodemailer = new Nodemailer();
+        const otp: string = await mail.sendOtp(email);
+        req.session.otp = otp
+        req.session.cookie.maxAge = 1 * 60 * 1000
+        res.json({ success: "OK" })
+      } else {
+        throw("Auth vailed")
+      }
+    } catch (error: unknown) {
+      logger.error("Error verifying OTP", error)
+      res.json({
+        error: error
+      })
+    }
+  }
+  public resetPassword = async (req: Request, res: Response): Promise<void> => {
+    if(res.locals.userLogged) {
+      res.render("auth/resetPassword", { csrf: req.csrfToken() })
+    } else {
+      res.redirect("/")
+    }
+  }
+  public resetPasswordVerify = async (req:Request, res:Response) => {
+    interface DataClient {
+      otp: string;
+      password1: string;
+      password2: string;
+    }
+    if(res.locals.userLogged) {
+      try {
+        const dataClient: DataClient = req.body
+        await this.otpSchema.parseAsync(dataClient.otp)
+        await this.passwordSchema.parseAsync(dataClient.password1)
+        await this.passwordSchema.parseAsync(dataClient.password2)
+        const savedOtp = req.session.otp
+        if(dataClient.otp === savedOtp as string) {
+          if(dataClient.password1 === dataClient.password2) {
+            const jwtDecode = jwt.verify(req.session.token!, process.env.SECRET_JWT_KEY as Secret);
+            const { _id, email } = jwtDecode as JwtPayload; 
+            await Users.update({
+              password: password.hashSync(dataClient.password2, "bcrypt")
+            }, { where: { id: _id } })
+            res.redirect("/?success=Password berhasil di rubah")
+          } else {
+            return res.redirect("/users/resetPassword?error=PASSWORD tidak sama");
+          }
+        } else {
+          return res.redirect("/users/resetPassword?error=OTP tidak sesuai");
+        }
+      } catch (error: unknown) {
+        if (error instanceof ZodError) {
+          const errorMessage: string = this.handleValidationErrors(error);
+          return res.redirect("/users/resetPassword?error=" + errorMessage);
+        } else {
+          logger.error(error);
+          return res.redirect("/users/resetPassword?error=Kesalahan tidak terduga");
+        }
+      }
+    } else {
+      res.render("/")
+    }
+  }
 }

@@ -16,7 +16,7 @@ export default class Nodemailer {
         pass: isDevelopment ? account?.pass :  process.env.EMAIL_PASSWORD,
       },
       tls: {
-        rejectUnauthorized: false  // Menjamin bahwa server menggunakan sertifikat yang valid
+        rejectUnauthorized: isDevelopment ? true : false  // Menjamin bahwa server menggunakan sertifikat yang valid
       },
       logger: true
     });
@@ -44,6 +44,13 @@ export default class Nodemailer {
       `, // Isi email dalam format HTML
     };
     const transporter = await this.transporter()
+    transporter.verify((error, success) => {
+      if (error) {
+        logger.error("SMTP connection error:", error);
+      } else {
+        logger.info("SMTP connection verified:", success);
+      }
+    });
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         return logger.error('Error saat mengirim email:', error);

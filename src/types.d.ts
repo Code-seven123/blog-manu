@@ -11,9 +11,10 @@ declare namespace NodeJS {
     PORT: number;
     SECRET_JWT_KEY: string;
     SECRET_COOKIE_KEY: string;
+    SECRET_SESSION_KEY: string;
     EMAIL_NAME: string;
     EMAIL_PASSWORD: string;
-    EMAIL_HOST: string
+    EMAIL_HOST: string;
     EMAIL_PORT: number;
     EMAIL_SECURE: boolean;
     COOKIE_SECURE: boolean;

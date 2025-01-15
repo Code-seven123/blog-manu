@@ -23,8 +23,9 @@ await sequelize.authenticate()
     logger.error('Unable to connect to the database:', err);
   });
 
+
 export class Users extends Model<InferAttributes<Users>, InferCreationAttributes<Users>> {
-  declare userId: CreationOptional<number>;
+  declare id: CreationOptional<number>;
   declare username: string;
   declare email: string;
   declare bio: string;
@@ -39,13 +40,13 @@ export class Blogs extends Model<InferAttributes<Blogs>, InferCreationAttributes
   declare title: string;
   declare content: string;
   declare image: string;
-  declare userId: ForeignKey<Users["userId"]>;
+  declare userId: ForeignKey<Users["id"]>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 }
 
 Users.init({
-  userId: {
+  id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true
@@ -114,11 +115,11 @@ Blogs.init({
 }, { sequelize, tableName: "blogs" })
 
 Users.hasMany(Blogs, {
-  sourceKey: "userId",
+  sourceKey: "id",
   foreignKey: "userId",
   as: "blogs"
 })
-Blogs.belongsTo(Users, { targetKey: "userId" })
+Blogs.belongsTo(Users, { targetKey: "id", as: "user" })
 
 const opt: object = process.env.NODE_ENV == "development" ? { force: true } : { alter: true }
 await sequelize.sync(opt)

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Blogs } from "../../database";
 import { logger } from "../../src/winston-log";
 import jwt, { Secret } from 'jsonwebtoken';
+import { Op } from "sequelize";
 
 export default class MainController {
   private pageSize: number = 6
@@ -33,8 +34,5 @@ export default class MainController {
       logger.error("Error index as mainController", error)
       res.status(500)
     }
-  }
-  public title = async (req:Request, res:Response): Promise<void> => {
-    const title = req.params.title
   }
 }

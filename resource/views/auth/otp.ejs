@@ -43,6 +43,7 @@
     <!-- OTP Input Form -->
     <form id="otp-form" method="POST" action="/users/verify-otp">
       <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <input type="hidden" name="email" value="<%= email %>">
       <div class="otp-input d-flex justify-content-center mb-4">
         <input type="text" id="otp-1" name="otp[]" maxlength="1" class="form-control">
         <input type="text" id="otp-2" name="otp[]" maxlength="1" class="form-control">

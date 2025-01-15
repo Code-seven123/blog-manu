@@ -38,13 +38,13 @@ describe('Blog Creation Tests', () => {
       otpVerify: false
     });
 
-    userId = user.userId;
+    userId = user.id;
   });
 
-  // afterAll(async () => {
-  //   // Menutup koneksi setelah tes selesai
-  //   await sequelize.close();
-  // });
+  afterAll(async () => {
+    // Menutup koneksi setelah tes selesai
+    await sequelize.close();
+  });
 
   it('should create 24 blogs', async () => {
     // Memanggil fungsi untuk membuat 24 blog

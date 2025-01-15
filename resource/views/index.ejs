@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
   </head>
   <body>
-    <nav class="navbar navbar-dark bg-dark fixed-top">
+    <nav class="navbar navbar-dark bg-dark sticky-top">
       <div class="container-fluid">
         <a class="navbar-brand" href="/">Manu Blog</a>
         <div class="d-flex align-items-center">
@@ -31,7 +31,7 @@
                 </li>
                 <% if(userLogged) { %>
                 <li class="nav-item border border-white bg-opacity-9 bg-success border-3">
-                  <h1 class="nav-link disabled fs-3 ms-2" style="color: white"><%= user?.name || "404" %></h1>
+                  <h1 class="nav-link disabled fs-3 ms-2" style="color: white"><%= he.encode(user?.name || "404") %></h1>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="#">My Blog</a>
@@ -69,7 +69,28 @@
           <a href="#posts" class="btn btn-warning btn-lg mt-3">Explore Latest Posts</a>
       </div>
     </section>
-
+    <% if(successEjs) { %>
+      <div class="alert alert-success" role="alert">
+          <%= successEjs %>
+      </div>        
+    <% } %>
+    <div class="modal fade" id="cookieConsentModal" tabindex="-1" aria-labelledby="cookieConsentModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cookieConsentModalLabel">Penggunaan Cookies</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Kami menggunakan cookies untuk meningkatkan pengalaman Anda di situs kami. Dengan melanjutkan menggunakan situs ini, Anda menyetujui penggunaan cookies kami.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tolak</button>
+            <button type="button" class="btn btn-primary" id="acceptCookies">Setuju</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Blog Posts Section -->
     <section id="posts" class="container my-5">
         <h2 class="text-center mb-4">Latest Posts</h2>
@@ -77,11 +98,11 @@
           <% for(const data of dataBlog) {%>
           <div class="col-md-4">
               <div class="card mb-4 shadow-sm">
-                  <img src="<%= data.image ?? 'https://via.placeholder.com/350x200' %>" class="card-img-top" alt="Blog Post Image">
+                  <img src="<%= he.encode(data.image ?? 'https://dummyimage.com/320x200/808080/0&text=Blank+Image') %>" class="card-img-top" alt="Blog Post Image">
                   <div class="card-body">
                       <h5 class="card-title"><%= he.encode(data.title) %></h5>
                       <p class="card-text"><%= he.encode(data.content.slice(200)) %></p>
-                      <a href="<%= data.title.trim().replace(" ", "-").toLowerCase() ?? '#' %>" class="btn btn-primary">Read More</a>
+                      <a href="/post/<%= he.encode(data.title.trim().replace(" ", "-").toLowerCase() ?? '#') %>" class="btn btn-primary">Read More</a>
                   </div>
               </div>
           </div>
@@ -89,7 +110,7 @@
         </div>
         <nav aria-label="pagination blog">
           <ul class="pagination justify-content-center">
-            <li class="page-item <%= currentPage <= 1 ? 'disabled' : '' %>">
+            <li class="page-item <%= he.encode(currentPage <= 1 ? 'disabled' : '') %>">
               <a class="page-link" href="/<%= currentPage - 1 %>#posts"><span aria-hidden="true">&laquo;</span></a>
             </li>
             <% for(let i = 1; i <= page; i++) { %>
@@ -113,7 +134,29 @@
             <a href="#" class="text-warning">Instagram</a>.
         </p>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script>
+      // Cek apakah pengguna sudah memberi izin cookies
+      if (!localStorage.getItem('cookiesAccepted')) {
+        // Jika belum, tampilkan modal
+        var cookieConsentModal = new bootstrap.Modal(document.getElementById('cookieConsentModal'));
+        cookieConsentModal.show();
+      }
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-  </body>
+      // Menangani klik "Setuju"
+      document.getElementById('acceptCookies').addEventListener('click', function() {
+        // Menyimpan status persetujuan di LocalStorage agar tidak ditampilkan lagi
+        localStorage.setItem('cookiesAccepted', 'true');
+        // Menyembunyikan modal setelah setuju
+        var cookieConsentModal = bootstrap.Modal.getInstance(document.getElementById('cookieConsentModal'));
+        cookieConsentModal.hide();
+
+        // Simpan cookie jika perlu, untuk penggunaan lebih lanjut di server atau client
+        document.cookie = "userConsent=true; path=/; max-age=" + 60*60*24*365 + ";"; // Cookie berlaku 1 tahun
+      });
+    </script>
+    
+    
+    </body>
 </html>
